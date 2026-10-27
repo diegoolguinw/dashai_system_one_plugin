@@ -1,0 +1,11 @@
+text,category
+"Olvidé mi contraseña y no recibo el correo para restablecer el acceso",acceso_y_login
+"I cannot log in to my account with my usual credentials",acceso_y_login
+"Me cobraron dos veces la suscripción mensual en mi tarjeta de crédito",facturacion
+"There is an incorrect charge on my monthly invoice",facturacion
+"La aplicación se cierra inesperadamente al subir un archivo adjunto",soporte_tecnico
+"The system crashes whenever I export the report to PDF",soporte_tecnico
+"¿Tienen planes de descuento para instituciones educativas o estudiantes?",ventas_y_precios
+"Do you offer enterprise pricing or educational discounts?",ventas_y_precios
+"Quiero cancelar mi suscripción inmediatamente",bajas_y_cancelacion
+"Please close and delete my account permanently",bajas_y_cancelacion

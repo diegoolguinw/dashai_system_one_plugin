@@ -1,0 +1,72 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dashai-system-one-plugin"
+version = "0.1.0"
+description = "System One open local models (Laya, GLiNER, Kev) for DashAI"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+  { name = "Diego Olguin-Wende", email = "dolguin@dim.uchile.cl" }
+]
+keywords = ["DashAI", "Model", "SystemOne", "FastInference", "Router"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "numpy>=1.24.0",
+  "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+dashai = [
+  "dashAI>=0.9.7.post2",
+]
+laya = [
+  "laya>=0.4.0",
+  "torch>=2.0.0",
+]
+gliner = [
+  "gliner2>=2.0.0",
+  "torch>=2.0.0",
+]
+all = [
+  "dashai-system-one-plugin[dashai,laya,gliner]",
+]
+dev = [
+  "build",
+  "pytest>=7.0.0",
+  "pytest-cov",
+  "ruff>=0.1.0",
+]
+
+[project.entry-points.'dashai.plugins']
+LayaTextClassifier = "dashai_system_one_plugin.models.laya_text_classifier:LayaTextClassifier"
+LayaMultilingualTextClassifier = "dashai_system_one_plugin.models.laya_text_classifier:LayaMultilingualTextClassifier"
+GLiNERDecideTextClassifier = "dashai_system_one_plugin.models.gliner_text_classifier:GLiNERDecideTextClassifier"
+GLiNERMultiDecideTextClassifier = "dashai_system_one_plugin.models.gliner_text_classifier:GLiNERMultiDecideTextClassifier"
+KevTextClassifier = "dashai_system_one_plugin.models.kev_text_classifier:KevTextClassifier"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dashai_system_one_plugin"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-m 'not integration'"
+markers = [
+  "integration: downloads and executes a real Hugging Face checkpoint or local model runtime",
+  "contract: contract invariance verification tests",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
