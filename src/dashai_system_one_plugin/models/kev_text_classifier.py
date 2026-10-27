@@ -5,13 +5,13 @@ from typing import Any, ClassVar
 from dashai_system_one_plugin.backends.kev_backend import KevBackend
 from dashai_system_one_plugin.core.base_backend import BaseSystemOneBackend
 from dashai_system_one_plugin.models.base_dashai_system_one import (
-    BaseDashAISystemOneClassifier,
     BaseSystemOneSchema,
+    DashAISystemOneClassifier,
     MultilingualString,
 )
 
 
-class KevTextClassifier(BaseDashAISystemOneClassifier):
+class KevTextClassifier(DashAISystemOneClassifier):
     """Text classification using local Kev 0.8B runtime over 127.0.0.1 loopback."""
 
     SCHEMA = BaseSystemOneSchema

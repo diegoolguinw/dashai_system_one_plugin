@@ -83,8 +83,13 @@ class BaseSystemOneSchema(BaseSchema):
     )
 
 
-class BaseDashAISystemOneClassifier(BaseModel):
-    """Abstract adapter integrating System One backends with DashAI's TextClassificationTask."""
+class DashAISystemOneClassifier(BaseModel):
+    """Abstract adapter integrating System One backends with DashAI's TextClassificationTask.
+
+    Note: The class name intentionally avoids 'Base' so DashAI's component
+    registry inspection (which filters __mro__ for 'Base' in name) unambiguously
+    resolves BaseModel as the single root base type.
+    """
 
     SCHEMA = BaseSystemOneSchema
     COMPATIBLE_COMPONENTS: ClassVar[list[str]] = ["TextClassificationTask"]
@@ -169,7 +174,7 @@ class BaseDashAISystemOneClassifier(BaseModel):
         y_train: Any,
         x_validation: Any = None,
         y_validation: Any = None,
-    ) -> "BaseDashAISystemOneClassifier":
+    ) -> "DashAISystemOneClassifier":
         """Configure zero-shot labels and initialize the backend without altering weights."""
         self.class_names = self._extract_class_names(y_train)
         self.label_to_idx = {name: idx for idx, name in enumerate(self.class_names)}
@@ -280,7 +285,7 @@ class BaseDashAISystemOneClassifier(BaseModel):
             json.dump(metadata, f, indent=2, ensure_ascii=False)
 
     @classmethod
-    def load(cls, filename: str) -> "BaseDashAISystemOneClassifier":
+    def load(cls, filename: str) -> "DashAISystemOneClassifier":
         """Restore instance from saved JSON metadata file."""
         with open(filename, "r", encoding="utf-8") as f:
             metadata = json.load(f)
@@ -314,3 +319,7 @@ class BaseDashAISystemOneClassifier(BaseModel):
         instance.label_to_idx = {name: idx for idx, name in enumerate(instance.class_names)}
         instance.idx_to_label = {idx: name for name, idx in instance.label_to_idx.items()}
         return instance
+
+
+# Backward compatibility alias
+BaseDashAISystemOneClassifier = DashAISystemOneClassifier

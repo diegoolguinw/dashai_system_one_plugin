@@ -5,13 +5,13 @@ from typing import Any, ClassVar
 from dashai_system_one_plugin.backends.gliner_backend import GLiNERBackend
 from dashai_system_one_plugin.core.base_backend import BaseSystemOneBackend
 from dashai_system_one_plugin.models.base_dashai_system_one import (
-    BaseDashAISystemOneClassifier,
     BaseSystemOneSchema,
+    DashAISystemOneClassifier,
     MultilingualString,
 )
 
 
-class GLiNERDecideTextClassifier(BaseDashAISystemOneClassifier):
+class GLiNERDecideTextClassifier(DashAISystemOneClassifier):
     """Zero-shot text classification using GLiNER 2.5 Decide (English)."""
 
     SCHEMA = BaseSystemOneSchema
@@ -31,7 +31,7 @@ class GLiNERDecideTextClassifier(BaseDashAISystemOneClassifier):
         return GLiNERBackend()
 
 
-class GLiNERMultiDecideTextClassifier(BaseDashAISystemOneClassifier):
+class GLiNERMultiDecideTextClassifier(DashAISystemOneClassifier):
     """Zero-shot text classification using GLiNER 2.5 Decide (Multilingual)."""
 
     SCHEMA = BaseSystemOneSchema

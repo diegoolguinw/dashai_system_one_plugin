@@ -5,13 +5,13 @@ from typing import Any, ClassVar
 from dashai_system_one_plugin.backends.laya_backend import LayaBackend
 from dashai_system_one_plugin.core.base_backend import BaseSystemOneBackend
 from dashai_system_one_plugin.models.base_dashai_system_one import (
-    BaseDashAISystemOneClassifier,
     BaseSystemOneSchema,
+    DashAISystemOneClassifier,
     MultilingualString,
 )
 
 
-class LayaTextClassifier(BaseDashAISystemOneClassifier):
+class LayaTextClassifier(DashAISystemOneClassifier):
     """Fast zero-shot text classification using Laya Router (English)."""
 
     SCHEMA = BaseSystemOneSchema
@@ -31,7 +31,7 @@ class LayaTextClassifier(BaseDashAISystemOneClassifier):
         return LayaBackend()
 
 
-class LayaMultilingualTextClassifier(BaseDashAISystemOneClassifier):
+class LayaMultilingualTextClassifier(DashAISystemOneClassifier):
     """Fast zero-shot text classification using Laya Multilingual Router."""
 
     SCHEMA = BaseSystemOneSchema
