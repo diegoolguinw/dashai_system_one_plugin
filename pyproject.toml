@@ -31,11 +31,11 @@ dashai = [
   "dashAI>=0.9.7.post2",
 ]
 laya = [
-  "laya>=0.4.0",
+  "laya>=0.4.17",
   "torch>=2.0.0",
 ]
 gliner = [
-  "gliner2>=2.0.0",
+  "gliner2>=2.1.0",
   "torch>=2.0.0",
 ]
 all = [
@@ -43,6 +43,7 @@ all = [
 ]
 dev = [
   "build",
+  "twine",
   "pytest>=7.0.0",
   "pytest-cov",
   "ruff>=0.1.0",
@@ -68,5 +69,9 @@ markers = [
 ]
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501", "B905"]  # E501: long Spanish strings are fine

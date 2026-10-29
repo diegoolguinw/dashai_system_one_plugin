@@ -32,3 +32,6 @@ checkpoints/
 .DS_Store
 .idea/
 .vscode/
+
+# Benchmark inputs (re-created by benchmarks/prepare_data.py)
+benchmarks/data/

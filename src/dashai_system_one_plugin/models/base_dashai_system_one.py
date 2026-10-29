@@ -287,7 +287,7 @@ class DashAISystemOneClassifier(BaseModel):
     @classmethod
     def load(cls, filename: str) -> "DashAISystemOneClassifier":
         """Restore instance from saved JSON metadata file."""
-        with open(filename, "r", encoding="utf-8") as f:
+        with open(filename, encoding="utf-8") as f:
             metadata = json.load(f)
 
         required = {

@@ -33,7 +33,7 @@ def main():
     csv_path = pathlib.Path(__file__).resolve().parent / "routing_sample.csv"
     texts = []
     labels = []
-    with open(csv_path, "r", encoding="utf-8") as f:
+    with open(csv_path, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             texts.append(row["text"])
