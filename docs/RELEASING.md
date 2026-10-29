@@ -15,7 +15,7 @@ tokens guardados en el repositorio.
    | Campo | PyPI | TestPyPI |
    |---|---|---|
    | PyPI project name | `dashai-system-one-plugin` | `dashai-system-one-plugin` |
-   | Owner / Repository | tu usuario u organización de GitHub y el nombre del repo | igual |
+   | Owner / Repository | `diegoolguinw` / `dashai_system_one_plugin` | igual |
    | Workflow name | `release.yml` | `release.yml` |
    | Environment name | `pypi` | `testpypi` |
 
@@ -23,6 +23,9 @@ tokens guardados en el repositorio.
    obligatorio para que nadie publique sin aprobación.
 4. El nombre `dashai-system-one-plugin` estaba libre en PyPI y TestPyPI al preparar esta guía; compruébalo de
    nuevo antes del primer envío.
+5. El README de PyPI se genera con `hatch-fancy-pypi-readme`, que convierte los enlaces relativos en absolutos
+   hacia `blob/main` del repositorio; por eso la rama `main` debe contener `docs/`, `examples/` y `LICENSE`
+   para que no queden rotos.
 
 ## 2. Antes de cada versión
 

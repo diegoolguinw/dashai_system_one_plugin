@@ -47,7 +47,7 @@ antes de automatizar decisiones.**
 Requiere Python ≥ 3.10. Desde el código fuente:
 
 ```bash
-git clone <url-del-repositorio> && cd dashai-system-one-plugin
+git clone https://github.com/diegoolguinw/dashai_system_one_plugin.git && cd dashai_system_one_plugin
 pip install -e ".[all]"          # DashAI + Laya + GLiNER
 # o solo lo que necesites:
 pip install -e ".[laya]"         # Laya

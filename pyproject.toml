@@ -1,12 +1,11 @@
 [build-system]
-requires = ["hatchling>=1.27"]
+requires = ["hatchling>=1.27", "hatch-fancy-pypi-readme>=24.1"]
 build-backend = "hatchling.build"
 
 [project]
 name = "dashai-system-one-plugin"
-dynamic = ["version"]
+dynamic = ["version", "readme"]
 description = "Local zero-shot text classification for DashAI with the open System One models Laya and GLiNER"
-readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 authors = [
@@ -28,6 +27,13 @@ dependencies = [
   "numpy>=1.24.0",
   "pydantic>=2.0.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/diegoolguinw/dashai_system_one_plugin"
+Documentation = "https://github.com/diegoolguinw/dashai_system_one_plugin/tree/main/docs"
+Repository = "https://github.com/diegoolguinw/dashai_system_one_plugin"
+Issues = "https://github.com/diegoolguinw/dashai_system_one_plugin/issues"
+Changelog = "https://github.com/diegoolguinw/dashai_system_one_plugin/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dashai = [
@@ -60,6 +66,17 @@ GLiNERMultiDecideTextClassifier = "dashai_system_one_plugin.models.gliner_text_c
 
 [tool.hatch.version]
 path = "src/dashai_system_one_plugin/__init__.py"
+
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+
+# PyPI no resuelve enlaces relativos: se reescriben a absolutos al construir.
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = '\]\((?!https?://|#|mailto:)([^)\s]+)\)'
+replacement = '](https://github.com/diegoolguinw/dashai_system_one_plugin/blob/main/\1)'
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/dashai_system_one_plugin"]
