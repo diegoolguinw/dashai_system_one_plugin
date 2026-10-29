@@ -48,7 +48,7 @@ pulsa **Crear sesión**.
 
 ## 3. Elegir el modelo
 
-En el panel derecho, busca `Laya` (o `GLiNER`, `Kev`). Los modelos del plugin aparecen con el nombre
+En el panel derecho, busca `Laya` (o `GLiNER`). Los modelos del plugin aparecen con el nombre
 "Clasificador de Texto …":
 
 ![Catálogo de modelos](images/03-model-catalog.jpg)
@@ -59,7 +59,6 @@ En el panel derecho, busca `Laya` (o `GLiNER`, `Kev`). Los modelos del plugin ap
 | Laya multilingüe | `LayaMultilingualTextClassifier` | español u otros idiomas |
 | GLiNER Decide (EN) | `GLiNERDecideTextClassifier` | inglés, solo etiqueta |
 | GLiNER multi Decide | `GLiNERMultiDecideTextClassifier` | multilingüe, solo etiqueta |
-| Kev 0.8B | `KevTextClassifier` | inglés; necesita su runtime (ver sección 6) |
 
 ## 4. Configurar y ejecutar
 
@@ -93,19 +92,7 @@ probs = model.predict(["Me cobraron dos veces la suscripción"])
 print(model.class_names[probs.argmax(axis=1)[0]])        # facturacion
 ```
 
-## 6. Usar Kev
-
-Kev corre en un proceso aparte. Instala su runtime una vez (ver [local-models.md](local-models.md)) y arranca
-DashAI con dos variables para que el plugin lo levante y lo apague solo:
-
-```bash
-KEV_PYTHON=/ruta/kev/.venv/bin/python KEV_REPO_DIR=/ruta/kev python -m DashAI --no-browser
-```
-
-La primera ejecución de `KevTextClassifier` tarda ~10 s con los pesos en caché. Si falla, mira
-[troubleshooting.md](troubleshooting.md#kev).
-
-## 7. Qué hacer a continuación
+## 6. Qué hacer a continuación
 
 - Compara varios modelos en la misma sesión: DashAI los muestra lado a lado.
 - Mide sobre tus datos antes de automatizar nada; los modelos son zero-shot y las probabilidades de Laya no

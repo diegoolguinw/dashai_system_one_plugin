@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "dashai-system-one-plugin"
 version = "0.1.0"
-description = "System One open local models (Laya, GLiNER, Kev) for DashAI"
+description = "System One open local models (Laya, GLiNER) for DashAI"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -54,7 +54,6 @@ LayaTextClassifier = "dashai_system_one_plugin.models.laya_text_classifier:LayaT
 LayaMultilingualTextClassifier = "dashai_system_one_plugin.models.laya_text_classifier:LayaMultilingualTextClassifier"
 GLiNERDecideTextClassifier = "dashai_system_one_plugin.models.gliner_text_classifier:GLiNERDecideTextClassifier"
 GLiNERMultiDecideTextClassifier = "dashai_system_one_plugin.models.gliner_text_classifier:GLiNERMultiDecideTextClassifier"
-KevTextClassifier = "dashai_system_one_plugin.models.kev_text_classifier:KevTextClassifier"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/dashai_system_one_plugin"]

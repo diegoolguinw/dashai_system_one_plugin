@@ -17,7 +17,6 @@ Verificado en Apple M1 (CPU y MPS); CUDA no se ha probado en este proyecto.
 |---|---|---|---|
 | Laya | Verificado | Verificado (PyTorch) | Sin probar |
 | GLiNER 2.5 | Verificado | Verificado (PyTorch) | Sin probar |
-| Kev | No probado | Verificado (el servidor usa MLX automáticamente) | Sin probar (según su model card, bf16 en una L4) |
 
 `device="cuda"` o `"mps"` en una máquina sin ese dispositivo cae a CPU en silencio.
 
@@ -29,10 +28,8 @@ Verificado en Apple M1 (CPU y MPS); CUDA no se ha probado en este proyecto.
 | **Laya Multi** | `convaiinnovations/laya-multilingual` | `choice` | Sí | `False` | Apache-2.0 |
 | **GLiNER Decide** | `fastino/GLiNER2.5-Decide` | `choice` | No: solo etiqueta (one-hot) | `False` | Apache-2.0 |
 | **GLiNER Multi** | `fastino/GLiNER2.5-multi-Decide` | `choice` | No: solo etiqueta (one-hot) | `False` | Apache-2.0 |
-| **Kev** | `jaredpalmer/kev-0.8b` | `choice`, `score`, `noul` | Sí | `None` (calibración solo en distribución; no se afirma) | Apache-2.0 |
 
-El adaptador de DashAI (Text Classification) solo usa `choice`. `score` y `noul` están disponibles en el
-backend de Kev por la API de Python.
+El adaptador de DashAI (Text Classification) solo usa `choice`.
 
 ## 3.1 Versiones de dependencias probadas
 
@@ -42,7 +39,6 @@ backend de Kev por la API de Python.
 | `laya` | 0.4.17 |
 | `gliner2` | 2.1.0 |
 | `torch` | 2.13 |
-| Kev (`jaredpalmer/kev`) | commit `2074cc4` |
 
 ## 4. Política de Fallback de Dependencias
 

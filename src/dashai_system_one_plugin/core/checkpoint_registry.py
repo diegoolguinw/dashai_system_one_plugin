@@ -62,16 +62,6 @@ class CheckpointRegistry:
             description="Multilingual GLiNER variant for zero-shot label extraction and decisions.",
             approx_size_mb=1100,
         ),
-        "jaredpalmer/kev-0.8b": CheckpointInfo(
-            checkpoint_id="jaredpalmer/kev-0.8b",
-            display_name="Kev 0.8B (Local)",
-            backend_type="kev",
-            license_spdx="Apache-2.0",
-            is_multilingual=False,
-            default_revision="main",
-            description="Qwen 0.8B base with specialized decision head for choice, score, noul.",
-            approx_size_mb=1600,
-        ),
     }
 
     @classmethod

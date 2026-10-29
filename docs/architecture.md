@@ -24,13 +24,11 @@ flowchart TD
     subgraph Backends [Model Backends]
         Contracts --> Laya[LayaBackend: laya.load / Agent.predict]
         Contracts --> GLiNER[GLiNERBackend: gliner2.AutoExtractor]
-        Contracts --> Kev[KevBackend: HTTP 127.0.0.1 → kev.serve]
         Contracts --> Fake[FakeBackend: Offline Mock]
     end
 
     Laya --> LocalWeights1[(Local Cache: convaiinnovations/laya)]
     GLiNER --> LocalWeights2[(Local Cache: fastino/GLiNER2.5-Decide)]
-    Kev --> LocalWeights3[(Local Cache: jaredpalmer/kev-0.8b)]
 ```
 
 ## 2. Capas del Sistema
@@ -62,8 +60,7 @@ Hereda de `DashAI.back.models.base_model.BaseModel`:
 - Implementa `predict(x)`: Procesa las entradas por lotes (`batch_size`) y genera una matriz NumPy `(N, K)` de probabilidades o indicadores one-hot.
 - Implementa `save(path)` y `load(path)`: Serializa metadatos ligeros (nombre de modelo, revisión, clases mapeadas, configuración de dispositivo) evitando duplicar los pesos del modelo en el archivo de guardado de DashAI.
 
-### 2.5 Utilidades (`utils/`) y métricas (`metrics/`)
-- `utils/kev_process_manager.py`: arranca, comprueba y detiene el subproceso `kev.serve`, siempre ligado a `127.0.0.1`, con grupo de procesos propio y apagado SIGTERM → SIGKILL.
+### 2.5 Métricas (`metrics/`)
 - `metrics/classification.py`: Accuracy, Macro-F1, Log-Loss, Brier y ECE usadas por `benchmarks/`.
 
 ## 3. Cómo habla cada backend con su modelo
@@ -72,4 +69,3 @@ Hereda de `DashAI.back.models.base_model.BaseModel`:
 |---|---|---|
 | Laya | `laya.load(id, device).predict(state, {pregunta: {type, instructions, criteria}})` | Una pasada responde todas las preguntas; la respuesta anida `answers[pregunta]` |
 | GLiNER | `AutoExtractor.from_pretrained(id).classify_text(texto, {pregunta: {labels, prompt}})` | Devuelve solo la etiqueta |
-| Kev | `POST http://127.0.0.1:<puerto>/v1/systemone` | API compatible con TypeSafe System One; `GET /v1/models` sirve de health-check |

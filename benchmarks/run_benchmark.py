@@ -16,7 +16,6 @@ CONFIGS = [
     ("laya-multilingual", ["en", "es"], ["cpu", "mps"]),
     ("gliner", ["en"], ["cpu", "mps"]),
     ("gliner-multilingual", ["en", "es"], ["cpu", "mps"]),
-    ("kev", ["en"], ["mps"]),  # served by MLX on Apple Silicon; the device flag is not used
 ]
 
 

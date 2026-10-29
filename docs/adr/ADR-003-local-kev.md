@@ -1,7 +1,7 @@
 # ADR-003: Aislamiento Local Estricto para Kev (v0.2)
 
 ## Estado
-Aceptado
+Retirado: Kev se eliminó del plugin antes de la primera publicación (ver `CHANGELOG.md`). Se conserva como registro de la decisión y de lo aprendido.
 
 ## Fecha
 2026-10-27

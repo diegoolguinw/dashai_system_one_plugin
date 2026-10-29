@@ -11,7 +11,6 @@ Medido en un Apple M1 con 8 GB de RAM (ver `benchmark-results.md`):
 |---|---|---|---|
 | Laya (EN / multilingüe) | 807 MB / 647 MB | ~1,3–2,2 GB | MPS reduce la latencia p50 a ~55–135 ms |
 | GLiNER 2.5 Decide (EN / multilingüe) | ~1,8 GB / ~1,1 GB | ~1,7–2,5 GB | MPS ≈ 2× el throughput de CPU |
-| Kev 0.8B | ~1,6 GB (base Qwen) + ~63 MB (adaptador) | ~0,4 GB el cliente + ~0,3 GB el servidor (RSS; MLX usa memoria unificada y el RSS la subestima) | MLX en Apple Silicon; CUDA según su model card |
 
 - Con 8 GB de RAM conviene cargar **un modelo a la vez**. Cada modelo cargado en DashAI mantiene
   sus pesos en memoria mientras exista la instancia.
@@ -31,7 +30,7 @@ Cada propiedad debe traer `type` y `placeholder`.
 
 ### El modelo no aparece en el catálogo
 1. Instala el plugin **en el mismo entorno que DashAI**: `uv pip install --python <venv>/bin/python -e .`
-2. Reinicia DashAI. En el log debe aparecer `Se cargaron 5 plugins instalados`.
+2. Reinicia DashAI. En el log debe aparecer `Se cargaron 4 plugins instalados`.
 3. No uses `uv run` para arrancar DashAI tras instalar paquetes a mano: `uv run` sincroniza el entorno y
    puede desinstalar `laya` o `gliner2`. Arranca con `<venv>/bin/python -m DashAI`.
 
@@ -66,45 +65,6 @@ cada lote. El parámetro se conserva por compatibilidad con la UI.
   respuesta: el modelo no está entrenado para eso.
 - `gliner2` incluye un cliente de API en la nube (`GLiNER2API`). El plugin **no** lo usa.
 
-## Kev
-
-Kev no corre dentro de DashAI: el plugin habla por HTTP con un proceso local (`python -m kev.serve`).
-
-### `Could not connect to local Kev service at http://127.0.0.1:8008`
-No hay servicio escuchando. Opciones:
-
-1. Arrancarlo a mano en otra terminal:
-   ```bash
-   cd kev && uv run --extra serve python -m kev.serve --run jaredpalmer/kev-0.8b --port 8008
-   ```
-2. Dejar que el plugin lo arranque y lo apague: define `KEV_PYTHON` (intérprete del entorno de Kev) y,
-   si hace falta, `KEV_REPO_DIR` **antes de iniciar DashAI** (el worker hereda el entorno):
-   ```bash
-   KEV_PYTHON=/ruta/kev/.venv/bin/python KEV_REPO_DIR=/ruta/kev \
-     <venv-de-dashai>/bin/python -m DashAI --no-browser
-   ```
-
-### `Port 8008 on 127.0.0.1 is already in use; refusing to start Kev there`
-Otro proceso usa el puerto. El plugin no adopta servidores ajenos al arrancar uno propio. Cierra el otro
-proceso o usa otro puerto con el argumento `endpoint_url="http://127.0.0.1:<puerto>"`.
-
-### La primera carga tarda minutos
-Descarga el adaptador (~63 MB) y el modelo base `Qwen/Qwen3.5-0.8B-Base`, y el servidor compila. Medido:
-~270 s la primera vez, ~8–10 s con la caché. Si necesitas más margen: `startup_timeout=<segundos>`.
-
-### `Kev runtime exited during startup`
-El mensaje incluye las últimas líneas del log del servidor. Causas habituales: dependencias sin instalar
-(`uv sync --extra serve` en el repo de Kev) o Python fuera de `>=3.12,<3.14`.
-
-### `Kev service error HTTP 422`
-El estado supera 65 536 tokens. Acórtalo o inicia el servidor con `KEV_TRUNCATE_STATES=1`.
-
-### Limitaciones del modelo
-- **Solo inglés**; en español espera resultados peores.
-- Por debajo del azar en enrutado de tool-calls (según su model card).
-- La calibración de su temperatura (T=2,35) vale en distribución; por eso las respuestas llevan
-  `calibrated=None`.
-
 ## Sin conexión
 
 Tras la primera descarga, define `HF_HUB_OFFLINE=1` para garantizar que nada intenta conectarse:
@@ -121,7 +81,6 @@ ejecuta una vez con red para descargarlo.
 - `device="auto"` elige CUDA, luego MPS (Apple Silicon) y, si no, CPU.
 - Pedir `cuda` o `mps` en una máquina sin ese dispositivo cae a CPU en silencio. Comprueba el dispositivo
   real con `backend.device`.
-- Kev no usa este parámetro: en Apple Silicon el servidor usa MLX automáticamente.
 
 ## Probabilidades y métricas
 
@@ -129,6 +88,5 @@ ejecuta una vez con red para descargarlo.
 |---|---|---|---|
 | Laya | sí | `False` | Accuracy, F1; Log-Loss/Brier/ECE solo como diagnóstico |
 | GLiNER | no (one-hot) | `False` | Accuracy, F1 |
-| Kev | sí | `None` | Accuracy, F1; calibrar sobre tus datos antes de fijar umbrales |
 
 Con salidas one-hot, Log-Loss y Brier **no** miden calibración (ADR-002).

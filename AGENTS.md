@@ -17,7 +17,7 @@ Este documento rige la colaboración entre agentes supervisados y el coordinador
 | **A1** | DashAI Integration | `src/dashai_system_one_plugin/models/`, compatibilidad DashAI |
 | **A2** | Laya Backend | `src/dashai_system_one_plugin/backends/laya_backend.py`, tests Laya |
 | **A3** | GLiNER Backend | `src/dashai_system_one_plugin/backends/gliner_backend.py`, tests GLiNER |
-| **A4** | Kev Backend | `src/dashai_system_one_plugin/backends/kev_backend.py`, tests Kev |
+| **A4** | _(retirado)_ | Kev se eliminó del plugin; ver `CHANGELOG.md` |
 | **A5** | Quality & Verification | `tests/contract/`, suites de validación, benchmarks |
 | **A6** | Documentation | `README.md`, `docs/local-models.md`, `examples/` |
 

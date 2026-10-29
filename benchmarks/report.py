@@ -6,7 +6,7 @@ import json
 import pathlib
 
 HERE = pathlib.Path(__file__).resolve().parent
-ORDER = ["laya", "laya-multilingual", "gliner", "gliner-multilingual", "kev"]
+ORDER = ["laya", "laya-multilingual", "gliner", "gliner-multilingual"]
 
 
 def fmt(value: float | None, spec: str = ".3f") -> str:
@@ -25,8 +25,7 @@ def table(headers: list[str], rows: list[list[str]]) -> str:
 
 
 def label(run: dict) -> list[str]:
-    device = "MLX" if run["model"] == "kev" else run["device"]
-    return [f"`{run['model']}`", run["lang"], device]
+    return [f"`{run['model']}`", run["lang"], run["device"]]
 
 
 def render(runs: list[dict]) -> str:
@@ -68,7 +67,7 @@ def render(runs: list[dict]) -> str:
     rows = [
         label(r) + [fmt(r.get("log_loss")), fmt(r.get("brier")), fmt(r.get("ece"))]
         for r in runs
-        if r["device"] == "cpu" or r["model"] == "kev"
+        if r["device"] == "cpu"
     ]
     out.append(table(["Modelo", "Idioma", "Dispositivo", "Log-Loss", "Brier", "ECE (10 bins)"], rows))
 
@@ -91,20 +90,19 @@ def render(runs: list[dict]) -> str:
     out += ["", "## Throughput y memoria", ""]
     out.append(
         "`batch_size` no cambia el throughput: `DashAISystemOneClassifier.predict` recorre las muestras "
-        "una a una dentro de cada lote. La memoria es el RSS pico del proceso del benchmark; para Kev, "
-        "el servidor corre en otro proceso y se informa su RSS al final. En Apple Silicon la memoria de GPU es "
-        "unificada y el RSS la subestima (sobre todo con MLX/mmap); `Driver MPS` es lo que PyTorch reservó en la GPU."
+        "una a una dentro de cada lote. La memoria es el RSS pico del proceso del benchmark. En Apple Silicon la memoria de GPU es "
+        "unificada y el RSS puede subestimarla; `Driver MPS` es lo que PyTorch reservó en la GPU."
     )
     out.append("")
     rows = [
         label(r) + [
             fmt(r["throughput_samples_per_s"]["1"], ".1f"), fmt(r["throughput_samples_per_s"]["8"], ".1f"),
             fmt(r["throughput_samples_per_s"]["32"], ".1f"), fmt(r["peak_rss_mb"], ".0f"),
-            fmt(r.get("kev_server_rss_mb_end"), ".0f"), fmt(r.get("mps_driver_mb"), ".0f"),
+            fmt(r.get("mps_driver_mb"), ".0f"),
         ]
         for r in runs
     ]
-    out.append(table(["Modelo", "Idioma", "Dispositivo", "muestras/s (bs=1)", "(bs=8)", "(bs=32)", "RSS pico (MB)", "RSS servidor Kev (MB)", "Driver MPS (MB)"], rows))
+    out.append(table(["Modelo", "Idioma", "Dispositivo", "muestras/s (bs=1)", "(bs=8)", "(bs=32)", "RSS pico (MB)", "Driver MPS (MB)"], rows))
 
     out += ["", "## Sesgo de posición", ""]
     out.append(
@@ -121,13 +119,12 @@ def render(runs: list[dict]) -> str:
         ("- Es clasificación *zero-shot* con 18 nombres de clase sueltos (`play`, `qa`, `general`…) sin "
         "descripciones; varias clases son ambiguas entre sí. Las cifras sirven para comparar modelos en "
         "igualdad de condiciones, no como precisión esperada en otro dominio."),
-        ("- No se descarta que los datos de entrenamiento de algún modelo se solapen con MASSIVE. Kev documenta "
-        "sus fuentes de entrenamiento y MASSIVE no figura entre ellas; de Laya y GLiNER no hay lista equivalente."),
+        ("- No se descarta que los datos de entrenamiento de algún modelo se solapen con MASSIVE; "
+        "no se ha comprobado contra los datos de entrenamiento de Laya ni de GLiNER."),
         "- La exactitud es idéntica en CPU y MPS (mismo argmax); lo que cambia es la latencia.",
-        ("- La latencia incluye el coste del wrapper de DashAI (`predict` con una muestra). La memoria de Kev "
-        "se mide en el proceso del servidor que el propio benchmark arranca en un puerto dedicado."),
+        ("- La latencia incluye el coste del wrapper de DashAI (`predict` con una muestra)."),
         ("- Durante la ejecución había un servidor de DashAI abierto en la misma máquina y, en algún momento, "
-        "se usó Kev desde su UI; no se aisló la máquina, así que parte de la variación de latencia puede ser ruido."),
+        "se usó su interfaz; no se aisló la máquina, así que parte de la variación de latencia puede ser ruido."),
         ("- Sesgo de posición: se invierte el orden de las etiquetas y se cuenta cuántas predicciones cambian; "
         "no se prueban otras permutaciones."),
     ]

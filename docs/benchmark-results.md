@@ -8,7 +8,7 @@ Generado por `benchmarks/run_benchmark.py` y `benchmarks/report.py` siguiendo `d
 - Python 3.13.13, torch 2.13.0, laya 0.4.17, gliner2 2.1.0, transformers 5.15.1, numpy 2.4.6.
 - Dataset: MASSIVE (`mteb/amazon_massive_scenario`, CC-BY-4.0), split `test`, 300 muestras por idioma, semilla 0, 18 clases (los mismos ids en inglés y español). Las etiquetas se pasan como nombres de clase sin descripciones, como lo hace DashAI.
 - Los modelos solo-inglés no se evalúan sobre español.
-- Checkpoints (commit en el Hub): `convaiinnovations/laya`@`7b928d828b7b`, `convaiinnovations/laya-multilingual`@`1720e3e3357c`, `fastino/GLiNER2.5-Decide`@`9d1bfb848cd1`, `fastino/GLiNER2.5-multi-Decide`@`e173bca1f0c4`, `jaredpalmer/kev-0.8b`@`bf75a6a8848e`.
+- Checkpoints (commit en el Hub): `convaiinnovations/laya`@`7b928d828b7b`, `convaiinnovations/laya-multilingual`@`1720e3e3357c`, `fastino/GLiNER2.5-Decide`@`9d1bfb848cd1`, `fastino/GLiNER2.5-multi-Decide`@`e173bca1f0c4`.
 
 ## Eficacia de decisión
 
@@ -26,7 +26,6 @@ Generado por `benchmarks/run_benchmark.py` y `benchmarks/report.py` siguiendo `d
 | `gliner-multilingual` | en | mps | 0.530 [0.473, 0.583] | 0.539 |
 | `gliner-multilingual` | es | cpu | 0.440 [0.380, 0.493] | 0.446 |
 | `gliner-multilingual` | es | mps | 0.440 [0.380, 0.493] | 0.446 |
-| `kev` | en | MLX | 0.507 [0.453, 0.563] | 0.551 |
 
 ## Calibración
 
@@ -40,7 +39,6 @@ Solo para modelos con distribución probabilística real (ADR-002). `n/a` = solo
 | `gliner` | en | cpu | n/a | n/a | n/a |
 | `gliner-multilingual` | en | cpu | n/a | n/a | n/a |
 | `gliner-multilingual` | es | cpu | n/a | n/a | n/a |
-| `kev` | en | MLX | 1.357 | 0.620 | 0.108 |
 
 ## Latencia
 
@@ -60,27 +58,25 @@ Una predicción por llamada a `predict()`. Fría = primera inferencia tras la ca
 | `gliner-multilingual` | en | mps | 13.9 | 924 | 48 | 61 | 71 | 299 |
 | `gliner-multilingual` | es | cpu | 13.9 | 218 | 90 | 97 | 99 | 299 |
 | `gliner-multilingual` | es | mps | 14.6 | 601 | 50 | 61 | 68 | 299 |
-| `kev` | en | MLX | 10.3 | 2365 | 168 | 172 | 174 | 299 |
 
 ## Throughput y memoria
 
-`batch_size` no cambia el throughput: `DashAISystemOneClassifier.predict` recorre las muestras una a una dentro de cada lote. La memoria es el RSS pico del proceso del benchmark; para Kev, el servidor corre en otro proceso y se informa su RSS al final. En Apple Silicon la memoria de GPU es unificada y el RSS la subestima (sobre todo con MLX/mmap); `Driver MPS` es lo que PyTorch reservó en la GPU.
+`batch_size` no cambia el throughput: `DashAISystemOneClassifier.predict` recorre las muestras una a una dentro de cada lote. La memoria es el RSS pico del proceso del benchmark. En Apple Silicon la memoria de GPU es unificada y el RSS puede subestimarla; `Driver MPS` es lo que PyTorch reservó en la GPU.
 
-| Modelo | Idioma | Dispositivo | muestras/s (bs=1) | (bs=8) | (bs=32) | RSS pico (MB) | RSS servidor Kev (MB) | Driver MPS (MB) |
-|---|---|---|---|---|---|---|---|---|
-| `laya` | en | cpu | 4.7 | 4.4 | 4.4 | 1609 | n/a | n/a |
-| `laya` | en | mps | 7.3 | 7.3 | 7.4 | 1741 | n/a | 2081 |
-| `laya-multilingual` | en | cpu | 12.7 | 12.4 | 12.8 | 2217 | n/a | n/a |
-| `laya-multilingual` | en | mps | 17.9 | 17.9 | 18.1 | 1257 | n/a | 1287 |
-| `laya-multilingual` | es | cpu | 12.1 | 12.1 | 12.1 | 1684 | n/a | n/a |
-| `laya-multilingual` | es | mps | 17.5 | 17.6 | 17.6 | 1786 | n/a | 1287 |
-| `gliner` | en | cpu | 3.6 | 3.7 | 3.6 | 2034 | n/a | n/a |
-| `gliner` | en | mps | 7.6 | 7.6 | 7.6 | 1658 | n/a | 2089 |
-| `gliner-multilingual` | en | cpu | 10.4 | 10.1 | 9.7 | 2489 | n/a | n/a |
-| `gliner-multilingual` | en | mps | 20.7 | 20.9 | 21.0 | 2264 | n/a | 1183 |
-| `gliner-multilingual` | es | cpu | 10.5 | 11.3 | 11.0 | 2331 | n/a | n/a |
-| `gliner-multilingual` | es | mps | 20.0 | 20.0 | 19.3 | 1864 | n/a | 1159 |
-| `kev` | en | MLX | 6.1 | 6.2 | 6.1 | 374 | 266 | n/a |
+| Modelo | Idioma | Dispositivo | muestras/s (bs=1) | (bs=8) | (bs=32) | RSS pico (MB) | Driver MPS (MB) |
+|---|---|---|---|---|---|---|---|
+| `laya` | en | cpu | 4.7 | 4.4 | 4.4 | 1609 | n/a |
+| `laya` | en | mps | 7.3 | 7.3 | 7.4 | 1741 | 2081 |
+| `laya-multilingual` | en | cpu | 12.7 | 12.4 | 12.8 | 2217 | n/a |
+| `laya-multilingual` | en | mps | 17.9 | 17.9 | 18.1 | 1257 | 1287 |
+| `laya-multilingual` | es | cpu | 12.1 | 12.1 | 12.1 | 1684 | n/a |
+| `laya-multilingual` | es | mps | 17.5 | 17.6 | 17.6 | 1786 | 1287 |
+| `gliner` | en | cpu | 3.6 | 3.7 | 3.6 | 2034 | n/a |
+| `gliner` | en | mps | 7.6 | 7.6 | 7.6 | 1658 | 2089 |
+| `gliner-multilingual` | en | cpu | 10.4 | 10.1 | 9.7 | 2489 | n/a |
+| `gliner-multilingual` | en | mps | 20.7 | 20.9 | 21.0 | 2264 | 1183 |
+| `gliner-multilingual` | es | cpu | 10.5 | 11.3 | 11.0 | 2331 | n/a |
+| `gliner-multilingual` | es | mps | 20.0 | 20.0 | 19.3 | 1864 | 1159 |
 
 ## Sesgo de posición
 
@@ -100,14 +96,13 @@ Fracción de predicciones que cambian al invertir el orden de la lista de etique
 | `gliner-multilingual` | en | mps | 18.0% | 100 |
 | `gliner-multilingual` | es | cpu | 18.0% | 100 |
 | `gliner-multilingual` | es | mps | 18.0% | 100 |
-| `kev` | en | MLX | 18.0% | 100 |
 
 ## Límites de estos resultados
 
 - Una sola máquina (ver Condiciones), una sola ejecución y 300 muestras por idioma: los intervalos de Accuracy son anchos (~±5 puntos); diferencias menores que eso no son concluyentes.
 - Es clasificación *zero-shot* con 18 nombres de clase sueltos (`play`, `qa`, `general`…) sin descripciones; varias clases son ambiguas entre sí. Las cifras sirven para comparar modelos en igualdad de condiciones, no como precisión esperada en otro dominio.
-- No se descarta que los datos de entrenamiento de algún modelo se solapen con MASSIVE. Kev documenta sus fuentes de entrenamiento y MASSIVE no figura entre ellas; de Laya y GLiNER no hay lista equivalente.
+- No se descarta que los datos de entrenamiento de algún modelo se solapen con MASSIVE; no se ha comprobado contra los datos de entrenamiento de Laya ni de GLiNER.
 - La exactitud es idéntica en CPU y MPS (mismo argmax); lo que cambia es la latencia.
-- La latencia incluye el coste del wrapper de DashAI (`predict` con una muestra). La memoria de Kev se mide en el proceso del servidor que el propio benchmark arranca en un puerto dedicado.
-- Durante la ejecución había un servidor de DashAI abierto en la misma máquina y, en algún momento, se usó Kev desde su UI; no se aisló la máquina, así que parte de la variación de latencia puede ser ruido.
+- La latencia incluye el coste del wrapper de DashAI (`predict` con una muestra).
+- Durante la ejecución había un servidor de DashAI abierto en la misma máquina y, en algún momento, se usó su interfaz; no se aisló la máquina, así que parte de la variación de latencia puede ser ruido.
 - Sesgo de posición: se invierte el orden de las etiquetas y se cuenta cuántas predicciones cambian; no se prueban otras permutaciones.

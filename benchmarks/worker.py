@@ -30,7 +30,6 @@ from dashai_system_one_plugin.models.gliner_text_classifier import (
     GLiNERDecideTextClassifier,
     GLiNERMultiDecideTextClassifier,
 )
-from dashai_system_one_plugin.models.kev_text_classifier import KevTextClassifier
 from dashai_system_one_plugin.models.laya_text_classifier import (
     LayaMultilingualTextClassifier,
     LayaTextClassifier,
@@ -41,7 +40,6 @@ MODELS = {
     "laya-multilingual": LayaMultilingualTextClassifier,
     "gliner": GLiNERDecideTextClassifier,
     "gliner-multilingual": GLiNERMultiDecideTextClassifier,
-    "kev": KevTextClassifier,
 }
 INSTRUCTION = "Classify the user utterance by the scenario it belongs to."
 
@@ -53,11 +51,6 @@ def load_samples(path: str, n: int, seed: int) -> tuple[list[str], list[str]]:
     rng = random.Random(seed)
     picked = sorted(rng.sample(range(len(rows)), n))
     return [rows[i]["text"] for i in picked], [rows[i]["label_text"] for i in picked]
-
-
-def rss_mb(pid: int) -> float | None:
-    out = subprocess.run(["ps", "-o", "rss=", "-p", str(pid)], capture_output=True, text=True, check=False)
-    return int(out.stdout.strip()) / 1024 if out.stdout.strip() else None
 
 
 def percentiles(values: list[float]) -> dict[str, float]:
@@ -116,20 +109,15 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--permute-n", type=int, default=100)
     ap.add_argument("--throughput-n", type=int, default=36)
-    ap.add_argument("--kev-port", type=int, default=18008, help="dedicated port, never a shared server")
     a = ap.parse_args()
 
     texts, labels = load_samples(a.data, a.n, a.seed)
     cls = MODELS[a.model]
-    extra = {"endpoint_url": f"http://127.0.0.1:{a.kev_port}"} if a.model == "kev" else {}
-    model = cls(instruction=INSTRUCTION, batch_size=1, device=a.device, **extra)
+    model = cls(instruction=INSTRUCTION, batch_size=1, device=a.device)
 
     t0 = time.perf_counter()
     model.train(texts, labels)  # zero-shot: registers labels and loads the backend
     load_s = time.perf_counter() - t0
-    if a.model == "kev" and model.backend._manager is None:
-        # Timings of a server we did not start would include someone else's load.
-        raise SystemExit(f"A Kev server was already listening on port {a.kev_port}.")
     classes = model.class_names
     y = np.array([classes.index(label) for label in labels])
 
@@ -178,13 +166,10 @@ def main() -> None:
             log_loss=log_loss(y, probs), brier=brier_score(y, probs),
             ece=expected_calibration_error(y, probs),
         )
-    if a.device == "mps" and a.model != "kev":
+    if a.device == "mps":
         import torch
 
         result["mps_driver_mb"] = torch.mps.driver_allocated_memory() / 2**20
-    if a.model == "kev" and model.backend._manager is not None:
-        result["kev_server_rss_mb_end"] = rss_mb(model.backend._manager._process.pid)
-        model.backend.unload()
     print(json.dumps(result))
 
 

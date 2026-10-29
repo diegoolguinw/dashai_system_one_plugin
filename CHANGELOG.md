@@ -8,13 +8,10 @@ Primera versión del plugin.
 
 ### Añadido
 - Modelos de Text Classification para DashAI: `LayaTextClassifier`, `LayaMultilingualTextClassifier`,
-  `GLiNERDecideTextClassifier`, `GLiNERMultiDecideTextClassifier` y `KevTextClassifier` (experimental).
+  `GLiNERDecideTextClassifier` y `GLiNERMultiDecideTextClassifier`.
 - Contrato tipado unificado (`DecisionSpec`, `QuestionSpec`, `DecisionAnswer`, `DecisionResult`) con
   preguntas `choice`, `score` y `noul`.
-- Backends locales: Laya (`laya.load`), GLiNER 2.5 (`AutoExtractor`) y Kev (`kev.serve` por HTTP en
-  `127.0.0.1`), más un `FakeBackend` para pruebas.
-- Supervisor del subproceso de Kev (`utils/kev_process_manager.py`): bind a loopback, grupo de procesos
-  propio, apagado SIGTERM → SIGKILL.
+- Backends locales: Laya (`laya.load`) y GLiNER 2.5 (`AutoExtractor`), más un `FakeBackend` para pruebas.
 - Métricas (`metrics/`): Accuracy, Macro-F1, Log-Loss, Brier y ECE.
 - Benchmarks reproducibles (`benchmarks/`) y resultados en `docs/benchmark-results.md`.
 - Documentación: tutorial con capturas, solución de problemas, guía de modelos locales, ADR 001–003.
@@ -22,6 +19,9 @@ Primera versión del plugin.
 
 ### Notas
 - Las probabilidades de Laya se marcan `calibrated=False` (sobreconfiado); GLiNER solo entrega etiqueta
-  (one-hot, `calibrated=False`); Kev usa `calibrated=None`.
+  (one-hot, `calibrated=False`).
 - `batch_size` se acepta por compatibilidad con DashAI pero no acelera la inferencia.
+- Kev (`jaredpalmer/kev-0.8b`) se implementó y verificó, pero se retiró antes de publicar: exige instalar
+  aparte su runtime (Python ≥ 3.12, `torch<2.9`, un clon de ~1 GB), es solo inglés y no encaja bien en la UI de
+  DashAI. El código sigue en el historial de git (commit `feat(kev)`).
 - Verificado en Apple M1 (CPU y MPS) con DashAI 0.10.0; CUDA sin probar.

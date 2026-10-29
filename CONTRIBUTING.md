@@ -3,8 +3,7 @@
 Gracias por tu interés. Este proyecto sigue las reglas de [AGENTS.md](AGENTS.md); lo esencial:
 
 1. **Solo modelos de pesos abiertos** con licencia permisiva comprobada (Apache-2.0, MIT).
-2. **Inferencia estrictamente local.** Ninguna llamada a APIs externas durante la inferencia; Kev solo habla con
-   `127.0.0.1`. Ten cuidado con los clientes de nube que traen algunas librerías (p. ej. `GLiNER2API`).
+2. **Inferencia estrictamente local.** Ninguna llamada a APIs externas durante la inferencia. Ten cuidado con los clientes de nube que traen algunas librerías (p. ej. `GLiNER2API`).
 3. **Honestidad matemática.** No sintetices probabilidades que el modelo no produce; si un backend solo da
    etiquetas, `probabilities_available = False` (ADR-002).
 4. **Contratos congelados.** Los tipos de `src/dashai_system_one_plugin/core/contracts.py` no se cambian sin un
@@ -25,7 +24,6 @@ Los tests de integración usan checkpoints reales y necesitan los extras y la ca
 ```bash
 pip install -e ".[laya,gliner]"
 pytest -m integration
-KEV_PYTHON=/ruta/kev/.venv/bin/python KEV_REPO_DIR=/ruta/kev pytest -m integration tests/integration/test_kev_real.py
 ```
 
 ## Pull requests

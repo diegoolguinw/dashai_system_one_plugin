@@ -12,18 +12,17 @@ en CPU y Apple Silicon (MPS).
 |---|---|---|
 | Laya (EN / multilingüe) | `convaiinnovations/laya`, `convaiinnovations/laya-multilingual` | `LayaTextClassifier`, `LayaMultilingualTextClassifier` |
 | GLiNER 2.5 Decide (EN / multilingüe) | `fastino/GLiNER2.5-Decide`, `fastino/GLiNER2.5-multi-Decide` | `GLiNERDecideTextClassifier`, `GLiNERMultiDecideTextClassifier` |
-| Kev 0.8B (experimental) | `jaredpalmer/kev-0.8b` | `KevTextClassifier` |
 
 ## Características
 
 1. **Inferencia local.** Ninguna llamada a APIs externas durante la inferencia. Internet se usa una sola vez
    para descargar paquetes y pesos; con `HF_HUB_OFFLINE=1` el plugin funciona sin conexión (verificado con la
-   red denegada a nivel de proceso). Kev solo se comunica con `127.0.0.1`.
+   red denegada a nivel de proceso).
 2. **Contrato tipado unificado.** `choice`, `score` y `noul` (`core/contracts.py`). Laya y GLiNER implementan
-   `choice`; Kev implementa los tres.
+   `choice`; `score` y `noul` quedan en el contrato para otros backends.
 3. **Honestidad sobre las probabilidades.** Solo se exponen probabilidades que el modelo calcula. GLiNER solo
    da la etiqueta, así que entrega one-hot con `calibrated=False`; las de Laya se marcan `calibrated=False`
-   porque están sobreconfiadas; las de Kev, `calibrated=None`. Ver [ADR-002](docs/adr/ADR-002-unified-contract.md).
+   porque están sobreconfiadas. Ver [ADR-002](docs/adr/ADR-002-unified-contract.md).
 4. **Integración con DashAI.** Aparecen en el catálogo de modelos de Text Classification con formulario
    bilingüe (ES/EN). Probado de punta a punta con DashAI 0.10.0.
 
@@ -38,7 +37,6 @@ confianza, calibración, memoria y límites en [docs/benchmark-results.md](docs/
 | Laya multilingüe | en / es | 0,53 / 0,44 | 79 / 57 ms | 0,27 / 0,35 |
 | GLiNER Decide | en | 0,63 | 253 / 128 ms | n/a (solo etiqueta) |
 | GLiNER multi Decide | en / es | 0,53 / 0,44 | 86 / 48 ms | n/a (solo etiqueta) |
-| Kev 0.8B | en | 0,51 | 168 ms (MLX) | 0,11 |
 
 Son modelos pequeños para decisiones rápidas, no clasificadores afinados a tu dominio. Entre el 12 % y el 23 %
 de las predicciones cambian al invertir el orden de las etiquetas. **Mide sobre una muestra etiquetada tuya
@@ -57,8 +55,7 @@ pip install -e ".[gliner]"       # GLiNER
 pip install -e .                 # contratos y backend de prueba, sin modelos
 ```
 
-Instálalo **en el mismo entorno que DashAI**. Kev necesita además su propio runtime
-([guía](docs/local-models.md#23-kev-08b)).
+Instálalo **en el mismo entorno que DashAI**.
 
 ## Uso en DashAI
 
@@ -94,7 +91,7 @@ print(answer.value, answer.probabilities, answer.calibrated)
 backend.unload()
 ```
 
-Más ejemplos: [`examples/real_backends.py`](examples/real_backends.py) (Laya, GLiNER y Kev) y
+Más ejemplos: [`examples/real_backends.py`](examples/real_backends.py) (Laya y GLiNER) y
 [`examples/local_inference.py`](examples/local_inference.py) (sin dependencias, con `FakeBackend`).
 
 ## Documentación
@@ -120,12 +117,11 @@ Las reglas de colaboración de los agentes del proyecto están en [AGENTS.md](AG
 ## Limitaciones conocidas
 
 - `batch_size` no acelera: el adaptador procesa las muestras una a una.
-- Kev es solo inglés y necesita instalar su runtime aparte; GLiNER no devuelve probabilidades.
+- GLiNER no devuelve probabilidades, solo la etiqueta.
 - Solo se ha probado en macOS (Apple M1, CPU y MPS); CUDA no se ha verificado.
 - Los modelos en español rinden claramente peor que en inglés en el benchmark.
 
 ## Licencia
 
 El código se distribuye bajo la licencia [MIT](LICENSE). Los pesos de los modelos tienen su propia licencia
-(todos Apache-2.0 al momento de escribir esto); el runtime de Kev
-([jaredpalmer/kev](https://github.com/jaredpalmer/kev)) es Apache-2.0.
+(todos Apache-2.0 al momento de escribir esto).
