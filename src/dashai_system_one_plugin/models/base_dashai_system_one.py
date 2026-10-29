@@ -54,7 +54,7 @@ from dashai_system_one_plugin.core.errors import InferenceError
 class BaseSystemOneSchema(BaseSchema):
     """Configuration schema for System One text classification models."""
 
-    instruction: Any = schema_field(
+    instruction: schema_field(
         string_field(),
         "Classify the input text into one of the available categories.",
         alias=MultilingualString(en="Instruction Prompt", es="Instrucción del Prompt"),
@@ -62,8 +62,8 @@ class BaseSystemOneSchema(BaseSchema):
             en="Natural language guidance for zero-shot decision classification.",
             es="Guía en lenguaje natural para la clasificación de decisiones zero-shot.",
         ),
-    )
-    batch_size: Any = schema_field(
+    )  # type: ignore
+    batch_size: schema_field(
         int_field(ge=1),
         32,
         alias=MultilingualString(en="Batch Size", es="Tamaño de Lote"),
@@ -71,8 +71,8 @@ class BaseSystemOneSchema(BaseSchema):
             en="Number of text samples processed together in each batch.",
             es="Número de muestras de texto procesadas juntas en cada lote.",
         ),
-    )
-    device: Any = schema_field(
+    )  # type: ignore
+    device: schema_field(
         enum_field(enum=["auto", "cpu", "cuda", "mps"]),
         "auto",
         alias=MultilingualString(en="Compute Device", es="Dispositivo de Cómputo"),
@@ -80,7 +80,7 @@ class BaseSystemOneSchema(BaseSchema):
             en="Target hardware: auto-detect, CPU, NVIDIA CUDA, or Apple Silicon MPS.",
             es="Hardware objetivo: autodetección, CPU, NVIDIA CUDA o Apple Silicon MPS.",
         ),
-    )
+    )  # type: ignore
 
 
 class DashAISystemOneClassifier(BaseModel):
