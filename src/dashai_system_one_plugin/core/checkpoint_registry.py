@@ -30,7 +30,7 @@ class CheckpointRegistry:
             is_multilingual=False,
             default_revision="main",
             description="Compact System One neural router for fast choice decisions.",
-            approx_size_mb=120,
+            approx_size_mb=807,
         ),
         "convaiinnovations/laya-multilingual": CheckpointInfo(
             checkpoint_id="convaiinnovations/laya-multilingual",
@@ -40,7 +40,7 @@ class CheckpointRegistry:
             is_multilingual=True,
             default_revision="main",
             description="Multilingual System One router supporting Spanish, English, and more.",
-            approx_size_mb=250,
+            approx_size_mb=647,
         ),
         "fastino/GLiNER2.5-Decide": CheckpointInfo(
             checkpoint_id="fastino/GLiNER2.5-Decide",
@@ -50,7 +50,7 @@ class CheckpointRegistry:
             is_multilingual=False,
             default_revision="main",
             description="Bidirectional encoder model for zero-shot decision classification.",
-            approx_size_mb=450,
+            approx_size_mb=1800,
         ),
         "fastino/GLiNER2.5-multi-Decide": CheckpointInfo(
             checkpoint_id="fastino/GLiNER2.5-multi-Decide",
@@ -60,17 +60,7 @@ class CheckpointRegistry:
             is_multilingual=True,
             default_revision="main",
             description="Multilingual GLiNER variant for zero-shot label extraction and decisions.",
-            approx_size_mb=650,
-        ),
-        "jaredpalmer/kev-0.8b": CheckpointInfo(
-            checkpoint_id="jaredpalmer/kev-0.8b",
-            display_name="Kev 0.8B (Local)",
-            backend_type="kev",
-            license_spdx="Apache-2.0",
-            is_multilingual=False,
-            default_revision="main",
-            description="Qwen 0.8B base with specialized decision head for choice, score, noul.",
-            approx_size_mb=1600,
+            approx_size_mb=1100,
         ),
     }
 

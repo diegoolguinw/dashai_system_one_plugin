@@ -1,20 +1,22 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.27", "hatch-fancy-pypi-readme>=24.1"]
 build-backend = "hatchling.build"
 
 [project]
 name = "dashai-system-one-plugin"
-version = "0.1.0"
-description = "System One open local models (Laya, GLiNER, Kev) for DashAI"
-readme = "README.md"
+dynamic = ["version", "readme"]
+description = "Local zero-shot text classification for DashAI with the open System One models Laya and GLiNER"
 requires-python = ">=3.10"
 license = "MIT"
 authors = [
   { name = "Diego Olguin-Wende", email = "dolguin@dim.uchile.cl" }
 ]
-keywords = ["DashAI", "Model", "SystemOne", "FastInference", "Router"]
+keywords = ["DashAI", "SystemOne", "Laya", "GLiNER", "zero-shot", "text-classification", "local-inference"]
 classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -26,16 +28,23 @@ dependencies = [
   "pydantic>=2.0.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/diegoolguinw/dashai_system_one_plugin"
+Documentation = "https://github.com/diegoolguinw/dashai_system_one_plugin/tree/main/docs"
+Repository = "https://github.com/diegoolguinw/dashai_system_one_plugin"
+Issues = "https://github.com/diegoolguinw/dashai_system_one_plugin/issues"
+Changelog = "https://github.com/diegoolguinw/dashai_system_one_plugin/blob/main/CHANGELOG.md"
+
 [project.optional-dependencies]
 dashai = [
   "dashAI>=0.9.7.post2",
 ]
 laya = [
-  "laya>=0.4.0",
+  "laya>=0.4.17",
   "torch>=2.0.0",
 ]
 gliner = [
-  "gliner2>=2.0.0",
+  "gliner2>=2.1.0",
   "torch>=2.0.0",
 ]
 all = [
@@ -43,6 +52,7 @@ all = [
 ]
 dev = [
   "build",
+  "twine>=7.0",
   "pytest>=7.0.0",
   "pytest-cov",
   "ruff>=0.1.0",
@@ -53,10 +63,26 @@ LayaTextClassifier = "dashai_system_one_plugin.models.laya_text_classifier:LayaT
 LayaMultilingualTextClassifier = "dashai_system_one_plugin.models.laya_text_classifier:LayaMultilingualTextClassifier"
 GLiNERDecideTextClassifier = "dashai_system_one_plugin.models.gliner_text_classifier:GLiNERDecideTextClassifier"
 GLiNERMultiDecideTextClassifier = "dashai_system_one_plugin.models.gliner_text_classifier:GLiNERMultiDecideTextClassifier"
-KevTextClassifier = "dashai_system_one_plugin.models.kev_text_classifier:KevTextClassifier"
+
+[tool.hatch.version]
+path = "src/dashai_system_one_plugin/__init__.py"
+
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+
+# PyPI no resuelve enlaces relativos: se reescriben a absolutos al construir.
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = '\]\((?!https?://|#|mailto:)([^)\s]+)\)'
+replacement = '](https://github.com/diegoolguinw/dashai_system_one_plugin/blob/main/\1)'
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/dashai_system_one_plugin"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/docs/images", "/.github"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
@@ -68,5 +94,9 @@ markers = [
 ]
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501", "B905"]  # E501: long Spanish strings are fine

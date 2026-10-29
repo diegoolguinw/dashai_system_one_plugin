@@ -13,7 +13,7 @@ A diferencia de los modelos LLM autoregresivos masivos o de modelos de optimizac
 flowchart TD
     UI[DashAI Frontend / UI] --> Pipeline[DashAI Task Runner]
     Pipeline --> TC[TextClassificationTask]
-    TC --> PluginModel[BaseDashAISystemOneClassifier]
+    TC --> PluginModel[DashAISystemOneClassifier]
     
     subgraph PluginCore [dashai-system-one-plugin Core]
         PluginModel --> Contracts[Unified Contracts: DecisionSpec & Result]
@@ -22,15 +22,13 @@ flowchart TD
     end
 
     subgraph Backends [Model Backends]
-        Contracts --> Laya[LayaBackend: laya.Router]
+        Contracts --> Laya[LayaBackend: laya.load / Agent.predict]
         Contracts --> GLiNER[GLiNERBackend: gliner2.AutoExtractor]
-        Contracts --> Kev[KevBackend: Localhost 127.0.0.1 Process]
         Contracts --> Fake[FakeBackend: Offline Mock]
     end
 
     Laya --> LocalWeights1[(Local Cache: convaiinnovations/laya)]
     GLiNER --> LocalWeights2[(Local Cache: fastino/GLiNER2.5-Decide)]
-    Kev --> LocalWeights3[(Local Cache: jaredpalmer/kev-0.8b)]
 ```
 
 ## 2. Capas del Sistema
@@ -43,9 +41,8 @@ Define las estructuras inmutables e independientes de DashAI:
 - `DecisionResult`: Contenedor de todas las respuestas, identificador del modelo y revisión.
 
 ### 2.2 Capa de Registro y Caché (`core/checkpoint_registry.py`)
-- Controla checkpoints admitidos, identificadores fijos en Hugging Face, hashes y licencias correspondientes.
-- Permite operación 100% offline tras la primera descarga mediante verificación de archivos en caché local.
-- Asegura que ningún modelo de licencia restrictiva o código remoto inseguro se ejecute sin validación.
+- Lista los checkpoints aprobados con su identificador en Hugging Face, licencia (SPDX), tamaño aproximado y si son multilingües. Es una tabla de consulta (`CheckpointRegistry.get/is_approved/get_license`); no descarga ni verifica archivos.
+- La operación sin conexión depende de Hugging Face: tras la primera descarga, `HF_HUB_OFFLINE=1` garantiza que no se intente ninguna conexión (ver `docs/local-models.md`).
 
 ### 2.3 Capa de Motores Locales (`backends/`)
 Implementa la interfaz `BaseSystemOneBackend`:
@@ -54,7 +51,7 @@ Implementa la interfaz `BaseSystemOneBackend`:
 - `unload()`
 - `capabilities()`
 
-Cada backend gestiona los errores específicos de su biblioteca subyacente y los normaliza a los errores tipados del plugin (`BackendMissingError`, `CheckpointMissingError`, `OutOfMemoryError`, etc.).
+Cada backend gestiona los errores específicos de su biblioteca subyacente y los normaliza a los errores tipados del plugin (`BackendMissingError`, `InferenceError`, `UnsupportedQuestionError`, `SecurityError`, etc.).
 
 ### 2.4 Capa de Integración DashAI (`models/`)
 Hereda de `DashAI.back.models.base_model.BaseModel`:
@@ -62,3 +59,13 @@ Hereda de `DashAI.back.models.base_model.BaseModel`:
 - Implementa `train(x_train, y_train)`: Extrae y valida las clases categóricas de la columna de salida.
 - Implementa `predict(x)`: Procesa las entradas por lotes (`batch_size`) y genera una matriz NumPy `(N, K)` de probabilidades o indicadores one-hot.
 - Implementa `save(path)` y `load(path)`: Serializa metadatos ligeros (nombre de modelo, revisión, clases mapeadas, configuración de dispositivo) evitando duplicar los pesos del modelo en el archivo de guardado de DashAI.
+
+### 2.5 Métricas (`metrics/`)
+- `metrics/classification.py`: Accuracy, Macro-F1, Log-Loss, Brier y ECE usadas por `benchmarks/`.
+
+## 3. Cómo habla cada backend con su modelo
+
+| Backend | Llamada | Nota |
+|---|---|---|
+| Laya | `laya.load(id, device).predict(state, {pregunta: {type, instructions, criteria}})` | Una pasada responde todas las preguntas; la respuesta anida `answers[pregunta]` |
+| GLiNER | `AutoExtractor.from_pretrained(id).classify_text(texto, {pregunta: {labels, prompt}})` | Devuelve solo la etiqueta |

@@ -12,7 +12,7 @@ def test_registry_contains_approved_models():
     assert "convaiinnovations/laya-multilingual" in ids
     assert "fastino/GLiNER2.5-Decide" in ids
     assert "fastino/GLiNER2.5-multi-Decide" in ids
-    assert "jaredpalmer/kev-0.8b" in ids
+    assert len(ids) == 4
 
 
 def test_registry_license_is_permissive():
