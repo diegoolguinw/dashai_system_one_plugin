@@ -17,12 +17,15 @@ from dashai_system_one_plugin.core.errors import (
 
 
 class GLiNERBackend(BaseSystemOneBackend):
-    """Adapter wrapping GLiNER 2.5 AutoExtractor for local classification."""
+    """Adapter wrapping a local GLiNER2 extractor for zero-shot classification.
+
+    Only the local ``AutoExtractor`` is used; the hosted ``GLiNER2API`` client that
+    ``gliner2`` also ships is never imported (local inference only).
+    """
 
     def __init__(self) -> None:
         super().__init__()
         self._extractor: Any = None
-        self._has_calibrated_probabilities: bool = False
 
     def load(
         self,
@@ -31,14 +34,12 @@ class GLiNERBackend(BaseSystemOneBackend):
         device: str = "auto",
         **kwargs: Any,
     ) -> None:
-        """Load GLiNER2 AutoExtractor from pretrained weights."""
+        """Load a GLiNER2 extractor from a Hub repo id or local directory.
+
+        With ``HF_HUB_OFFLINE=1`` the checkpoint is read from the local cache only.
+        """
         try:
-            try:
-                from gliner2 import AutoExtractor  # type: ignore
-                load_fn = AutoExtractor.from_pretrained
-            except ImportError:
-                from gliner import GLiNER  # type: ignore
-                load_fn = GLiNER.from_pretrained
+            from gliner2 import AutoExtractor  # type: ignore
         except ImportError as exc:
             raise BackendMissingError("gliner2", "gliner") from exc
 
@@ -47,9 +48,12 @@ class GLiNERBackend(BaseSystemOneBackend):
         self.device = resolve_device(device)
 
         try:
-            self._extractor = load_fn(self.checkpoint_id, revision=self.revision, **kwargs)
-            if hasattr(self._extractor, "to"):
-                self._extractor.to(self.device)
+            extractor = AutoExtractor.from_pretrained(
+                checkpoint_id, revision=self.revision, **kwargs
+            )
+            extractor.to(self.device)
+            extractor.eval()
+            self._extractor = extractor
             self._is_loaded = True
         except Exception as exc:
             raise InferenceError(
@@ -62,9 +66,11 @@ class GLiNERBackend(BaseSystemOneBackend):
         self.checkpoint_id = None
 
     def capabilities(self) -> dict[str, Any]:
+        # classify_text yields a hard label plus a confidence for the winner only;
+        # there is no full distribution, so none is exposed (ADR-002).
         return {
             "supported_question_types": ["choice"],
-            "probabilities_available": self._has_calibrated_probabilities,
+            "probabilities_available": False,
             "multi_question_support": True,
             "streaming": False,
         }
@@ -73,71 +79,40 @@ class GLiNERBackend(BaseSystemOneBackend):
         if not self._is_loaded or self._extractor is None:
             raise RuntimeError("GLiNERBackend must be loaded before calling predict().")
 
-        answers: dict[str, DecisionAnswer] = {}
-        state_str = str(spec.state)
-
+        tasks: dict[str, dict[str, Any]] = {}
+        options_by_question: dict[str, list[str]] = {}
         for q_name, q_spec in spec.questions.items():
             if q_spec.type != "choice":
                 raise UnsupportedQuestionError("GLiNERBackend", q_spec.type)
-
-            options: list[str]
-            if isinstance(q_spec.criteria, list):
-                options = q_spec.criteria
-            elif isinstance(q_spec.criteria, dict):
-                options = list(q_spec.criteria.keys())
+            if isinstance(q_spec.criteria, (list, dict)):
+                options_by_question[q_name] = list(q_spec.criteria)
             else:
                 raise InferenceError(f"Question '{q_name}' criteria cannot be None.")
+            tasks[q_name] = {
+                "labels": q_spec.criteria,
+                "prompt": q_spec.instructions,
+            }
 
-            try:
-                # GLiNER classification interface
-                if hasattr(self._extractor, "classify_text"):
-                    result = self._extractor.classify_text(state_str, options)
-                elif hasattr(self._extractor, "predict"):
-                    result = self._extractor.predict(state_str, options)
-                else:
-                    # Generic entity/classification fallback
-                    result = self._extractor(state_str, labels=options)
-            except Exception as exc:
-                raise InferenceError(f"GLiNER inference error on question '{q_name}': {exc}") from exc
+        state = spec.state if isinstance(spec.state, str) else str(spec.state)
+        try:
+            result = self._extractor.classify_text(state, tasks)
+        except Exception as exc:
+            raise InferenceError(f"GLiNER inference error: {exc}") from exc
 
-            # Parse result
-            chosen_label: str
-            probs: dict[str, float] | None = None
-
-            if isinstance(result, str) and result in options:
-                chosen_label = result
-            elif isinstance(result, list) and len(result) > 0:
-                first = result[0]
-                if isinstance(first, dict):
-                    chosen_label = first.get("label", options[0])
-                elif isinstance(first, str):
-                    chosen_label = first
-                else:
-                    chosen_label = options[0]
-            elif isinstance(result, dict):
-                chosen_label = result.get("label", result.get("choice", options[0]))
-                if "scores" in result or "probabilities" in result:
-                    raw_probs = result.get("probabilities", result.get("scores", {}))
-                    if isinstance(raw_probs, dict) and all(opt in raw_probs for opt in options):
-                        total = sum(raw_probs.values())
-                        if total > 0:
-                            probs = {opt: round(raw_probs[opt] / total, 4) for opt in options}
-            else:
-                chosen_label = options[0]
-
-            # In accordance with ADR-002: Do NOT invent fake calibrated confidence
-            # If backend only returned a hard label, one-hot representation with calibrated=False
-            if probs is None:
-                probs = {opt: (1.0 if opt == chosen_label else 0.0) for opt in options}
-                is_calibrated = False
-            else:
-                is_calibrated = True
-
+        answers: dict[str, DecisionAnswer] = {}
+        for q_name, options in options_by_question.items():
+            label = result.get(q_name) if isinstance(result, dict) else None
+            if label not in options:
+                raise InferenceError(
+                    f"GLiNER returned no valid label for question '{q_name}': {label!r}"
+                )
+            # ADR-002: hard label only. One-hot keeps argmax-based metrics working
+            # and is flagged uncalibrated rather than inventing confidence.
             answers[q_name] = DecisionAnswer(
                 kind="choice",
-                value=chosen_label,
-                probabilities=probs,
-                calibrated=is_calibrated,
+                value=label,
+                probabilities={opt: 1.0 if opt == label else 0.0 for opt in options},
+                calibrated=False,
             )
 
         return DecisionResult(
