@@ -34,3 +34,7 @@ pytest -m integration
   repo se reescribieron precisamente por haberse escrito contra APIs supuestas).
 - Actualiza `CHANGELOG.md` y la documentación afectada.
 - Si cambias un benchmark, regenera `docs/benchmark-results.md` con `benchmarks/report.py` e indica el hardware.
+
+## Publicación
+
+Las versiones se publican en PyPI siguiendo [docs/RELEASING.md](docs/RELEASING.md).

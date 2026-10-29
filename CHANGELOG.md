@@ -15,6 +15,8 @@ Primera versión del plugin.
 - Métricas (`metrics/`): Accuracy, Macro-F1, Log-Loss, Brier y ECE.
 - Benchmarks reproducibles (`benchmarks/`) y resultados en `docs/benchmark-results.md`.
 - Documentación: tutorial con capturas, solución de problemas, guía de modelos locales, ADR 001–003.
+- Preparación de publicación: versión con una única fuente, workflow de release con *trusted publishing*,
+  `scripts/check_release.py` y la guía `docs/RELEASING.md`.
 - Tests unitarios, de contrato y de integración con checkpoints reales (`pytest -m integration`).
 
 ### Notas

@@ -1,20 +1,23 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
 name = "dashai-system-one-plugin"
-version = "0.1.0"
-description = "System One open local models (Laya, GLiNER) for DashAI"
+dynamic = ["version"]
+description = "Local zero-shot text classification for DashAI with the open System One models Laya and GLiNER"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 authors = [
   { name = "Diego Olguin-Wende", email = "dolguin@dim.uchile.cl" }
 ]
-keywords = ["DashAI", "Model", "SystemOne", "FastInference", "Router"]
+keywords = ["DashAI", "SystemOne", "Laya", "GLiNER", "zero-shot", "text-classification", "local-inference"]
 classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -43,7 +46,7 @@ all = [
 ]
 dev = [
   "build",
-  "twine",
+  "twine>=7.0",
   "pytest>=7.0.0",
   "pytest-cov",
   "ruff>=0.1.0",
@@ -55,8 +58,14 @@ LayaMultilingualTextClassifier = "dashai_system_one_plugin.models.laya_text_clas
 GLiNERDecideTextClassifier = "dashai_system_one_plugin.models.gliner_text_classifier:GLiNERDecideTextClassifier"
 GLiNERMultiDecideTextClassifier = "dashai_system_one_plugin.models.gliner_text_classifier:GLiNERMultiDecideTextClassifier"
 
+[tool.hatch.version]
+path = "src/dashai_system_one_plugin/__init__.py"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/dashai_system_one_plugin"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/docs/images", "/.github"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
